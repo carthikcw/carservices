@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".views.MainActivity"
+    android:orientation="vertical"
+    android:layout_margin="10dp">
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/array_vehichle"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/shape_rectangle"
+        android:spinnerMode="dropdown"
+        style="@style/Widget.AppCompat.DropDownItem.Spinner"/>
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/array_services"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:spinnerMode="dropdown"
+        android:background="@drawable/shape_rectangle"
+        style="@style/Widget.AppCompat.DropDownItem.Spinner"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?android:listPreferredItemHeight"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:id="@+id/et_location"
+            android:hint="Location of Service"
+            android:background="@drawable/shape_rectangle"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|end"
+            app:srcCompat="@drawable/carwash"/>
+
+    </LinearLayout>
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:maxLength="10"
+        android:maxLines="1"
+        android:inputType="number"
+        android:hint="Contact Number"
+        android:background="@drawable/shape_rectangle"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:maxLength="10"
+        android:maxLines="1"
+        android:inputType="number"
+        android:hint="Alternate Number"
+        android:background="@drawable/shape_rectangle"/>
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:hint="Write us if you need any other service"
+        android:gravity="start"
+        android:background="@drawable/shape_rectangle"/>
+
+    <LinearLayout
+        android:id="@+id/btn_service_request"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="25dp"
+        android:background="@drawable/button_shape_blue"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="SUBMIT"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+    "
+
+</LinearLayout>

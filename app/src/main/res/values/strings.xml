@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">CarService</string>
+    <string name="Cancel">Cancel</string>
+    <string name="gps_network_not_enabled">"Location Disabled "</string>
+    <string name="open_location_settings">Open Location Settings</string>
+
+    <string-array name="array_vehichle">
+
+        <item>Select Vehichle Type</item>
+
+        <item>Car 4 wheeler</item>
+
+        <item>Bike 2 wheeler</item>
+
+        <item>Tata Ace</item>
+
+        <item>DCM</item>
+
+        <item>Lorry</item>
+
+    </string-array>
+
+
+    <string-array name="array_services">
+
+        <item>Washing Type</item>
+
+        <item>Water Wash</item>
+
+        <item>Foam Wash</item>
+
+        <item>Wash + Service</item>
+
+        <item>Break Down</item>
+
+        <item>Oil Leakage</item>
+
+    </string-array>
+    <string name="title_activity_maps">Map</string>
+
+</resources>
