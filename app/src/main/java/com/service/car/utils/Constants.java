@@ -17,4 +17,7 @@ public class Constants {
 
     public static final int INTERNET = 1;
     public static final int GPS = 2;
+    public static final int LATLNGREQUEST = 999;
+    public static final int PERMISSIONSREQUEST = 1000;
+
 }

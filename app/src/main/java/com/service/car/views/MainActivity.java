@@ -1,11 +1,14 @@
 package com.service.car.views;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,13 +21,18 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.service.car.R;
@@ -39,14 +47,22 @@ import static java.util.Locale.getDefault;
 
 public class MainActivity extends AppCompatActivity implements LocationListener, View.OnClickListener {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     private LocationManager locationManager;
+    private TelephonyManager telephonyManager;
     private static final int REQUEST_LOCATION = 123;
-    private EditText et_location;
+    private TextView tv_location;
+    private EditText etPhoneNumber1;
+    private EditText etPhoneNumber2;
     private FusedLocationProviderClient mFusedLocationClient;
-    boolean gps_enabled = false;
-    boolean network_enabled = false;
-    boolean internetEnabled = false;
+    private boolean gps_enabled = false;
+    private boolean network_enabled = false;
+    private boolean internetEnabled = false;
+    private String phoneNumber1;
+    private String phoneNumber2;
+    private List<SubscriptionInfo> subscription;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,31 +71,48 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         findViewById(R.id.iv_selectlocation).setOnClickListener(this);
         findViewById(R.id.btn_service_request).setOnClickListener(this);
 
-        if (!network_enabled && !gps_enabled) {
-            showDialogAlert(this, Constants.GPS);
-        } else if (!internetEnabled) {
+        if (!internetEnabled) {
             showDialogAlert(this, Constants.INTERNET);
-        }else if (network_enabled && gps_enabled) {
+        } else if (!network_enabled && !gps_enabled) {
+            showDialogAlert(this, Constants.GPS);
+        } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
 
-            if (Build.VERSION.SDK_INT > 28 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+            subscription = SubscriptionManager.from(getApplicationContext()).getActiveSubscriptionInfoList();
+            TelephonyManager tMgr = (TelephonyManager)   this.getSystemService(Context.TELEPHONY_SERVICE);
+            String mPhoneNumber = tMgr.getLine1Number();
+            Log.v(TAG," -->> phine "+ mPhoneNumber);
+
+            Log.v(TAG, "All Permissions Granted");
+            getUserDetails(this);
+
+        } else {
+            if (Build.VERSION.SDK_INT > 28) {
+                ActivityCompat.requestPermissions(this, new String[]{
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.READ_SMS,
+                                Manifest.permission.READ_PHONE_NUMBERS,
+                                Manifest.permission.READ_PHONE_STATE},
                         REQUEST_LOCATION);
-            } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                ActivityCompat.requestPermissions(this, new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.READ_SMS,
+                                Manifest.permission.READ_PHONE_NUMBERS,
+                                Manifest.permission.READ_PHONE_STATE},
                         REQUEST_LOCATION);
-            } else {
-                // permission granted
-                getUserLocation(this);
             }
-        }else {
-            finish();
         }
-
     }
 
-
     private void initViews(Context context) {
-        et_location = findViewById(R.id.et_location);
+        tv_location = findViewById(R.id.et_location);
+        etPhoneNumber1 = findViewById(R.id.et_primarynumber);
+        etPhoneNumber2 = findViewById(R.id.et_secondarynumber);
+        telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -113,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                                     callIntent = new Intent(
                                             android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                                 }
-                                startActivity(callIntent);
+                                startActivityForResult(callIntent, Constants.PERMISSIONSREQUEST);
                             }
                         });
         alertDialogBuilder.setNegativeButton("Cancel",
@@ -127,15 +160,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
 
-    private void getUserLocation(Context context) {
-        System.out.println("-->>> in method");
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
+    private void getUserDetails(Context context) {
+        Log.v(TAG," -->> size "+subscription.toString());
+
+        for (int i = 0; i < subscription.size(); i++) {
+            SubscriptionInfo info = subscription.get(i);
+            Log.d(TAG, "number " + info.getNumber());
+            Log.d(TAG, "network name : " + info.getCarrierName());
+            Log.d(TAG, "country iso " + info.getCountryIso());
+        }
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         Task<Location> task = mFusedLocationClient.getLastLocation();
         task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
-                    et_location.setText(getAddress(location.getLatitude(), location.getLongitude()));
+                    tv_location.setText(getAddress(location.getLatitude(), location.getLongitude()));
                 } else {
                     Toast.makeText(MainActivity.this, "Select Location from Map", Toast.LENGTH_SHORT).show();
                 }
@@ -146,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     @Override
     public void onLocationChanged(Location location) {
-        et_location.setText(getAddress(location.getLatitude(), location.getLongitude()));
+        tv_location.setText(getAddress(location.getLatitude(), location.getLongitude()));
     }
 
     @Override
@@ -161,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public void onProviderDisabled(String provider) {
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -168,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 System.out.println("Location permissions granted, starting location");
-                getUserLocation(getApplicationContext());
+                getUserDetails(getApplicationContext());
 
             } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 System.out.println("Location permissions Denied");
@@ -192,7 +235,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             add = add + "\n" + obj.getSubThoroughfare();
 
             Log.v("IGA", "Address" + add);
-            Toast.makeText(this, "Address=>" + add, Toast.LENGTH_SHORT).show();
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -205,15 +247,27 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.btn_service_request:
                 Toast.makeText(MainActivity.this, "Thankyou, Your Request id is 12324 \n Our team will serve you better in short time", Toast.LENGTH_SHORT).show();
                 finish();
                 break;
 
             case R.id.iv_selectlocation:
-                startActivity(new Intent(MainActivity.this, MapsActivity.class));
+                startActivityForResult(new Intent(MainActivity.this, MapsActivity.class), Constants.LATLNGREQUEST);
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Constants.LATLNGREQUEST) {
+            double latValue = data.getDoubleExtra("lat", 0.0);
+            double lngValue = data.getDoubleExtra("lng", 0.0);
+            tv_location.setText(getAddress(latValue, lngValue));
+        } else if (requestCode == Constants.PERMISSIONSREQUEST) {
+            initViews(getApplicationContext());
         }
     }
 }

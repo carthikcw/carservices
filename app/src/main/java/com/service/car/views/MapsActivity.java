@@ -1,8 +1,10 @@
 package com.service.car.views;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,13 +25,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.service.car.R;
+import com.service.car.utils.Constants;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private Location currentLocation;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private Marker locationMarker;
+    private Location selectedLocation;
 
     private static final int LOCATION_REQUEST_CODE = 101;
 
@@ -37,10 +42,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         if (ActivityCompat.checkSelfPermission(MapsActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapsActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -57,6 +58,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onSuccess(Location location) {
                 if (location != null) {
                     currentLocation = location;
+                    selectedLocation = location;
                     Toast.makeText(MapsActivity.this, currentLocation.getLatitude() + " " + currentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
                     SupportMapFragment supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
                     supportMapFragment.getMapAsync(MapsActivity.this);
@@ -68,21 +70,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         // Try to obtain the map from the SupportMapFragment.
         mMap.setMyLocationEnabled(true);
         if (currentLocation != null) {
+            selectedLocation = currentLocation;
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             //MarkerOptions are used to create a new Marker.You can specify location, title etc with MarkerOptions
             MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("My Vehicle is Here");
@@ -107,9 +101,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     fetchLastLocation();
                 } else {
-                    Toast.makeText(MapsActivity.this, "Location permission missing", Toast.LENGTH_SHORT).show();
+                    Log.e("ERROR ","LOCATION PERMISSION MISSING");
                 }
                 break;
             }
         }
+
+
+    @Override
+    public void onBackPressed() {
+        Log.v(TAG,"back pressed");
+        Intent intent=new Intent();
+        intent.putExtra("lat",selectedLocation.getLatitude());
+        intent.putExtra("lng",selectedLocation.getLongitude());
+        setResult(Constants.LATLNGREQUEST,intent);
+        super.onBackPressed();
+    }
 }
