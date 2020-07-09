@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
@@ -22,180 +21,144 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.SettingsClient;
-import com.service.car.BuildConfig;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.service.car.R;
+import com.service.car.utils.Constants;
+import com.service.car.utils.NetworkUtil;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import static java.util.Locale.getDefault;
 
-public class MainActivity extends AppCompatActivity implements LocationListener {
+public class MainActivity extends AppCompatActivity implements LocationListener, View.OnClickListener {
 
     private LocationManager locationManager;
     private static final int REQUEST_LOCATION = 123;
     private EditText et_location;
-    // location updates interval - 10sec
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-
-    // fastest updates interval - 5 sec
-    // location updates will be received if another app is requesting the locations
-    // than your app can handle
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
-  //  private FusedLocationProviderClient fusedLocationClient;
-
-    // location last updated time
-    private String mLastUpdateTime;
-
-    // bunch of location related apis
     private FusedLocationProviderClient mFusedLocationClient;
-    private SettingsClient mSettingsClient;
-    private LocationRequest mLocationRequest;
-    private LocationSettingsRequest mLocationSettingsRequest;
-    private LocationCallback mLocationCallback;
-    private Location mCurrentLocation;
-
-    // boolean flag to toggle the ui
-    private Boolean mRequestingLocationUpdates;
-    private LocationRequest locationRequest;
-    private LocationCallback locationCallback;
     boolean gps_enabled = false;
     boolean network_enabled = false;
-
-
-
+    boolean internetEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initViews(this);
+        findViewById(R.id.iv_selectlocation).setOnClickListener(this);
+        findViewById(R.id.btn_service_request).setOnClickListener(this);
 
-        et_location = findViewById(R.id.et_location);
+        if (!network_enabled && !gps_enabled) {
+            showDialogAlert(this, Constants.GPS);
+        } else if (!internetEnabled) {
+            showDialogAlert(this, Constants.INTERNET);
+        }else if (network_enabled && gps_enabled) {
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        try {
-            gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch(Exception ex) {
-
-        }
-
-        try {
-            network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch(Exception ex) {
-
-        }
-
-
-        if(!gps_enabled && !network_enabled) {
-            // notify user
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-            alertDialogBuilder.setMessage("GPS is disabled in your device. Would you like to enable it?")
-                    .setCancelable(false)
-                    .setPositiveButton("Goto Settings Page To Enable GPS",
-                            new DialogInterface.OnClickListener(){
-                                public void onClick(DialogInterface dialog, int id){
-                                    Intent callGPSSettingIntent = new Intent(
-                                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                    startActivity(callGPSSettingIntent);
-                                }
-                            });
-            alertDialogBuilder.setNegativeButton("Cancel",
-                    new DialogInterface.OnClickListener(){
-                        public void onClick(DialogInterface dialog, int id){
-                            dialog.cancel();
-                        }
-                    });
-            AlertDialog alert = alertDialogBuilder.create();
-            alert.show();
-        }
-
-        if (Build.VERSION.SDK_INT > 28 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION);
-        }else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION);
-        } else {
-            System.out.println("--->> permission granted");
-            // already permission granted
-            getUserLocation(this);
-        }
-
-
-
-
-        findViewById(R.id.btn_service_request).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Thankyou, Your Request id is 12324 \n Our team will serve you better in short time", Toast.LENGTH_SHORT).show();
-                finish();
+            if (Build.VERSION.SDK_INT > 28 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_LOCATION);
+            } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_LOCATION);
+            } else {
+                // permission granted
+                getUserLocation(this);
             }
-        });
+        }else {
+            finish();
+        }
+
+    }
 
 
+    private void initViews(Context context) {
+        et_location = findViewById(R.id.et_location);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        internetEnabled = NetworkUtil.getInstance().isNetworkConnected(context);
+    }
+
+    private void showDialogAlert(Context context, final int type) {
+        String dialogTitle = "";
+        String dialogMessage = "";
+        String positiveTitle;
+        String cancelTitle;
+        if (type == 1) {
+            dialogTitle = "NO INTERNET";
+            dialogMessage = "This App needs Network";
+        } else if (type == 2) {
+            dialogTitle = "NO GPS";
+            dialogMessage = "This App needs GPS";
+        }
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setTitle(dialogTitle);
+        alertDialogBuilder.setMessage(dialogMessage)
+                .setCancelable(false)
+                .setPositiveButton("Turn it on from Settings",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent callIntent = null;
+                                if (type == 1) {
+                                    callIntent = new Intent(
+                                            Settings.ACTION_WIRELESS_SETTINGS);
+                                } else if (type == 2) {
+                                    callIntent = new Intent(
+                                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                }
+                                startActivity(callIntent);
+                            }
+                        });
+        alertDialogBuilder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
     }
 
 
     private void getUserLocation(Context context) {
         System.out.println("-->>> in method");
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(20 * 1000);
-        locationCallback = new LocationCallback() {
+        Task<Location> task = mFusedLocationClient.getLastLocation();
+        task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    System.out.println("--->>> location result is null");
-                    return;
-                }
-                for (Location location : locationResult.getLocations()) {
-                    if (location != null) {
-                        double latitude = location.getLatitude();
-                        double longitude = location.getLongitude();
-                        System.out.println("--->>> location result is "+latitude + " - " +longitude);
-                        et_location.setText(String.format(Locale.US, "%s -- %s", latitude,longitude));
-                    }
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    et_location.setText(getAddress(location.getLatitude(), location.getLongitude()));
+                } else {
+                    Toast.makeText(MainActivity.this, "Select Location from Map", Toast.LENGTH_SHORT).show();
                 }
             }
-        };
+        });
     }
 
 
     @Override
     public void onLocationChanged(Location location) {
-
-        et_location.setText("Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
-        getAddress(location.getLatitude(), location.getLongitude());
+        et_location.setText(getAddress(location.getLatitude(), location.getLongitude()));
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
     }
 
     @Override
@@ -206,20 +169,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 System.out.println("Location permissions granted, starting location");
                 getUserLocation(getApplicationContext());
-//                LocationManager.enableLocationSupport(getApplicationContext());
 
-            }else if (grantResults[0] == PackageManager.PERMISSION_DENIED){
+            } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 System.out.println("Location permissions Denied");
             }
         }
     }
 
-    public void getAddress(double lat, double lng) {
+    public String getAddress(double lat, double lng) {
         Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+        String add = "";
         try {
             List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
             Address obj = addresses.get(0);
-            String add = obj.getAddressLine(0);
+            add = obj.getAddressLine(0);
             add = add + "\n" + obj.getCountryName();
             add = add + "\n" + obj.getCountryCode();
             add = add + "\n" + obj.getAdminArea();
@@ -229,12 +192,28 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             add = add + "\n" + obj.getSubThoroughfare();
 
             Log.v("IGA", "Address" + add);
-             Toast.makeText(this, "Address=>" + add, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Address=>" + add, Toast.LENGTH_SHORT).show();
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "error " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
+        return add;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_service_request:
+                Toast.makeText(MainActivity.this, "Thankyou, Your Request id is 12324 \n Our team will serve you better in short time", Toast.LENGTH_SHORT).show();
+                finish();
+                break;
+
+            case R.id.iv_selectlocation:
+                startActivity(new Intent(MainActivity.this, MapsActivity.class));
+                break;
         }
     }
 }

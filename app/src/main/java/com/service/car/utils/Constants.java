@@ -14,4 +14,7 @@ public class Constants {
 
     public static final String environmentrating = "ENVIRONMENT";
     public static final String fairsocialrating = "FAIR_SOCIAL";
+
+    public static final int INTERNET = 1;
+    public static final int GPS = 2;
 }

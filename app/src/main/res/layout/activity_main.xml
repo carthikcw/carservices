@@ -33,21 +33,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="?android:listPreferredItemHeight"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:weightSum="5"
+        android:background="@drawable/shape_rectangle">
         <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="10dp"
-            android:id="@+id/et_location"
-            android:hint="Location of Service"
-            android:background="@drawable/shape_rectangle"/>
-
-        <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|end"
-            app:srcCompat="@drawable/carwash"/>
+            android:layout_height="match_parent"
+            android:id="@+id/et_location"
+            android:layout_weight="4"
+            android:layout_gravity="start|center"
+            android:gravity="start"
+            android:hint="Location of Service" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center"
+            android:gravity="end"
+            android:id="@+id/iv_selectlocation"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/ic_my_location_black_24dp"/>
 
     </LinearLayout>
 
@@ -104,6 +111,5 @@
             android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
-    "
 
 </LinearLayout>
