@@ -8,27 +8,75 @@
     tools:context=".views.SplashActivity"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?android:listPreferredItemHeight"
-        android:text="LOOK AT OUR SERVICES"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:textStyle="bold|italic"
-        android:textColor="@color/colorPrimary"
-        />
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:src="@drawable/splashpic"/>
+        android:layout_height="150dp"
+        android:padding="5dp"
+        app:srcCompat="@drawable/alltimeservice"/>
 
-    <ProgressBar
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:padding="5dp"
+        app:srcCompat="@drawable/sanitisationboy"/>
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:padding="5dp"
+        app:srcCompat="@drawable/carwasher"/>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_margin="40dp"
+        android:gravity="center">
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/cb_terms"
+            android:gravity="center"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:gravity="start|center"
+            android:text="I accept the "
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:id="@+id/tv_terms"
+            android:layout_gravity="center"
+            android:textColor="@color/colorAccent"
+            android:gravity="start|center"
+            android:text="Terms &amp; Conditions"
+            />
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:backgroundTint="@color/splash_color"/>
+        app:cardCornerRadius="8dp"
+        android:id="@+id/card_go"
+        android:layout_gravity="center">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp"/>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

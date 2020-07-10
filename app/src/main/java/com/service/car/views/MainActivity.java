@@ -12,6 +12,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -30,6 +31,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.auth.api.credentials.HintRequest;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
@@ -49,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private LocationManager locationManager;
-    private TelephonyManager telephonyManager;
     private static final int REQUEST_LOCATION = 123;
     private TextView tv_location;
     private EditText etPhoneNumber1;
@@ -61,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private String phoneNumber1;
     private String phoneNumber2;
     private List<SubscriptionInfo> subscription;
+    private GoogleApiClient googleApiClient;
+    private boolean isHyderabadi;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
@@ -80,12 +86,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
 
-            subscription = SubscriptionManager.from(getApplicationContext()).getActiveSubscriptionInfoList();
-            TelephonyManager tMgr = (TelephonyManager)   this.getSystemService(Context.TELEPHONY_SERVICE);
-            String mPhoneNumber = tMgr.getLine1Number();
-            Log.v(TAG," -->> phine "+ mPhoneNumber);
-
-            Log.v(TAG, "All Permissions Granted");
+            getUserContacts(this);
             getUserDetails(this);
 
         } else {
@@ -108,11 +109,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
     }
 
+    private void getUserContacts(Context context) {
+        googleApiClient = new GoogleApiClient.Builder(context).addApi(Auth.CREDENTIALS_API).build();
+        HintRequest hintRequest = new HintRequest.Builder().setPhoneNumberIdentifierSupported(true).build();
+
+        PendingIntent intent = Auth.CredentialsApi.getHintPickerIntent(googleApiClient, hintRequest);
+        try {
+            startIntentSenderForResult(intent.getIntentSender(), Constants.MOBILENO_REQUEST, null, 0, 0, 0);
+        } catch (IntentSender.SendIntentException e) {
+            Log.e(TAG, "Could not start hint picker Intent", e);
+        }
+
+    }
+
     private void initViews(Context context) {
         tv_location = findViewById(R.id.et_location);
         etPhoneNumber1 = findViewById(R.id.et_primarynumber);
         etPhoneNumber2 = findViewById(R.id.et_secondarynumber);
-        telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -122,36 +135,48 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private void showDialogAlert(Context context, final int type) {
         String dialogTitle = "";
         String dialogMessage = "";
-        String positiveTitle;
+        String positiveTitle = "";
         String cancelTitle;
         if (type == 1) {
             dialogTitle = "NO INTERNET";
             dialogMessage = "This App needs Network";
+            positiveTitle = "Turn On from Settings";
         } else if (type == 2) {
             dialogTitle = "NO GPS";
             dialogMessage = "This App needs GPS";
+            positiveTitle = "Turn On from Settings";
+        } else if (type == 3) {
+            dialogTitle = "Services Not Available for this Location";
+            dialogMessage = "Currently this app is working in Hyderabad itself";
+            positiveTitle = "Close App";
         }
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
         alertDialogBuilder.setTitle(dialogTitle);
         alertDialogBuilder.setMessage(dialogMessage)
                 .setCancelable(false)
-                .setPositiveButton("Turn it on from Settings",
+                .setPositiveButton(positiveTitle,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 Intent callIntent = null;
                                 if (type == 1) {
-                                    callIntent = new Intent(
-                                            Settings.ACTION_WIRELESS_SETTINGS);
+                                    callIntent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                                    startActivityForResult(callIntent, Constants.PERMISSIONSREQUEST);
                                 } else if (type == 2) {
-                                    callIntent = new Intent(
-                                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                    callIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                    startActivityForResult(callIntent, Constants.PERMISSIONSREQUEST);
+                                } else if (type == 3) {
+                                    finish();
                                 }
-                                startActivityForResult(callIntent, Constants.PERMISSIONSREQUEST);
+
                             }
                         });
         alertDialogBuilder.setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        if (type == 3) {
+                            dialog.cancel();
+                            finish();
+                        }
                         dialog.cancel();
                     }
                 });
@@ -162,15 +187,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     private void getUserDetails(Context context) {
-        Log.v(TAG," -->> size "+subscription.toString());
-
-        for (int i = 0; i < subscription.size(); i++) {
-            SubscriptionInfo info = subscription.get(i);
-            Log.d(TAG, "number " + info.getNumber());
-            Log.d(TAG, "network name : " + info.getCarrierName());
-            Log.d(TAG, "country iso " + info.getCountryIso());
-        }
-
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         Task<Location> task = mFusedLocationClient.getLastLocation();
         task.addOnSuccessListener(new OnSuccessListener<Location>() {
@@ -184,7 +200,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             }
         });
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
@@ -208,13 +223,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_LOCATION) {
-
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                System.out.println("Location permissions granted, starting location");
+                Log.v(TAG, "Location permissions granted, starting location");
+                getUserContacts(getApplicationContext());
                 getUserDetails(getApplicationContext());
-
             } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                System.out.println("Location permissions Denied");
+                Log.v(TAG, "Location permissions Denied");
             }
         }
     }
@@ -226,22 +240,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
             Address obj = addresses.get(0);
             add = obj.getAddressLine(0);
-            add = add + "\n" + obj.getCountryName();
-            add = add + "\n" + obj.getCountryCode();
-            add = add + "\n" + obj.getAdminArea();
-            add = add + "\n" + obj.getPostalCode();
-            add = add + "\n" + obj.getSubAdminArea();
-            add = add + "\n" + obj.getLocality();
-            add = add + "\n" + obj.getSubThoroughfare();
-
-            Log.v("IGA", "Address" + add);
-
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-            Toast.makeText(this, "error " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
+//        if (!add.isEmpty() && !add.contains("Hyderabad")) {
+//            showDialogAlert(MainActivity.this, 3);
+//        }
         return add;
     }
 
@@ -249,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_service_request:
-                Toast.makeText(MainActivity.this, "Thankyou, Your Request id is 12324 \n Our team will serve you better in short time", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Thank you, Your Request id is 12324 \n Our team will serve you better in short time", Toast.LENGTH_SHORT).show();
                 finish();
                 break;
 
@@ -268,6 +273,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             tv_location.setText(getAddress(latValue, lngValue));
         } else if (requestCode == Constants.PERMISSIONSREQUEST) {
             initViews(getApplicationContext());
+        } else if (requestCode == Constants.MOBILENO_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Credential cred = data.getParcelableExtra(Credential.EXTRA_KEY);
+                if (cred != null) {
+                    etPhoneNumber1.setText(cred.getId());
+                } else {
+                    etPhoneNumber1.setText("Enter Contact Number");
+                }
+            }
         }
     }
 }
