@@ -44,7 +44,7 @@ public class SplashActivity extends AppCompatActivity implements View.OnClickLis
                 }
                 break;
             case R.id.tv_terms:
-                //startActivity(new Intent(SplashActivity.this,WebViewActivity.class));
+                startActivity(new Intent(SplashActivity.this,UsersActivity.class));
                 break;
         }
     }

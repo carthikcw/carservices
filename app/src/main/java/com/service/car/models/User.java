@@ -5,6 +5,14 @@ import com.google.gson.annotations.SerializedName;
 
 public class User {
 
+    /***
+     * For Fetching using User POJO
+     */
+
+    @SerializedName("customerId")
+    @Expose
+    private String customerId;
+
     @SerializedName("vehicleType")
     @Expose
     private String vehicleType;
@@ -38,4 +46,76 @@ public class User {
     @Expose
     private String isValidUser;
 
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public String getWashingType() {
+        return washingType;
+    }
+
+    public void setWashingType(String washingType) {
+        this.washingType = washingType;
+    }
+
+    public String getPrimaryNumber() {
+        return primaryNumber;
+    }
+
+    public void setPrimaryNumber(String primaryNumber) {
+        this.primaryNumber = primaryNumber;
+    }
+
+    public String getSecondaryNumber() {
+        return secondaryNumber;
+    }
+
+    public void setSecondaryNumber(String secondaryNumber) {
+        this.secondaryNumber = secondaryNumber;
+    }
+
+    public String getUserLocation() {
+        return userLocation;
+    }
+
+    public void setUserLocation(String userLocation) {
+        this.userLocation = userLocation;
+    }
+
+    public String getUserMessage() {
+        return userMessage;
+    }
+
+    public void setUserMessage(String userMessage) {
+        this.userMessage = userMessage;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getIsValidUser() {
+        return isValidUser;
+    }
+
+    public void setIsValidUser(String isValidUser) {
+        this.isValidUser = isValidUser;
+    }
 }

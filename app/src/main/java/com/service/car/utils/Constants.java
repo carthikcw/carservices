@@ -20,4 +20,5 @@ public class Constants {
     public static final int LATLNGREQUEST = 999;
     public static final int PERMISSIONSREQUEST = 1000;
 
+    public static final int MOBILENO_REQUEST = 101;
 }
