@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".views.MainActivity"
+    android:orientation="vertical"
+    android:layout_margin="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:background="@drawable/shape_rectangle">
+
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:entries="@array/provider_type"
+            android:padding="5dp"
+            android:id="@+id/spinner_vehicle"
+            android:spinnerMode="dropdown"
+            style="@style/Widget.AppCompat.DropDownItem.Spinner"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:background="@drawable/shape_rectangle">
+
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/provider_services"
+            android:padding="5dp"
+            android:id="@+id/spinner_washing"
+            android:spinnerMode="dropdown"
+            style="@style/Widget.AppCompat.DropDownItem.Spinner"/>
+
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:weightSum="5"
+        android:background="@drawable/shape_rectangle">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/et_location"
+            android:layout_weight="4"
+            android:layout_gravity="start|center"
+            android:gravity="start"
+            android:hint="Location of Service" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center"
+            android:gravity="end"
+            android:clickable="false"
+            android:focusable="false"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/ic_my_location_black_24dp"/>
+
+    </LinearLayout>
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:maxLength="15"
+        android:maxLines="1"
+        android:inputType="number"
+        android:id="@+id/et_primarynumber"
+        android:focusable="false"
+        android:clickable="false"
+        android:focusableInTouchMode="false"
+        android:hint="Provider Contact Number"
+        android:background="@drawable/shape_rectangle"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:maxLength="10"
+        android:maxLines="1"
+        android:inputType="number"
+        android:id="@+id/et_secondarynumber"
+        android:hint="Provider Alternate Number"
+        android:background="@drawable/shape_rectangle"/>
+
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:maxLines="3"
+        android:maxLength="800"
+        android:id="@+id/et_message"
+        android:hint="Please ask and write details of the provider
+        \nContact Person Name
+        \nLike Timings
+        \nLand Mark
+        \nMin to Max Fares"
+        android:gravity="start"
+        android:background="@drawable/shape_rectangle"/>
+
+    <RelativeLayout
+        android:id="@+id/btn_service_request"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="25dp"
+        android:background="@drawable/button_shape_blue"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:id="@+id/progress_bar_request"
+            android:visibility="gone"
+            android:indeterminateTint="@android:color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="SUBMIT"
+            android:layout_centerInParent="true"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+</LinearLayout>

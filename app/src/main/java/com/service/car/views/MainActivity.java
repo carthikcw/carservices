@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
@@ -23,11 +24,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,18 +38,25 @@ import com.google.android.gms.auth.api.credentials.HintRequest;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.service.car.R;
+import com.service.car.models.BaseResponse;
+import com.service.car.models.Customer;
+import com.service.car.services.RetrofitInstance;
+import com.service.car.services.EndPoints;
 import com.service.car.utils.Constants;
 import com.service.car.utils.NetworkUtil;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import static java.util.Locale.getDefault;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements LocationListener, View.OnClickListener {
 
@@ -67,6 +75,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private List<SubscriptionInfo> subscription;
     private GoogleApiClient googleApiClient;
     private boolean isHyderabadi;
+    private AppCompatSpinner vehicleSpinner;
+    private AppCompatSpinner washingSpinner;
+    private EditText etMessage;
+    private Customer customerObj;
+    private ProgressBar progressBarRequest;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
@@ -74,24 +87,28 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews(this);
-        findViewById(R.id.iv_selectlocation).setOnClickListener(this);
         findViewById(R.id.btn_service_request).setOnClickListener(this);
 
-        if (!internetEnabled) {
-            showDialogAlert(this, Constants.INTERNET);
-        } else if (!network_enabled && !gps_enabled) {
-            showDialogAlert(this, Constants.GPS);
-        } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+        requestUserPermissions(this);
+    }
 
-            getUserContacts(this);
-            getUserDetails(this);
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
+    private void requestUserPermissions(MainActivity activity) {
+        if (!internetEnabled) {
+            showDialogAlert(activity, Constants.INTERNET);
+        } else if (!network_enabled && !gps_enabled) {
+            showDialogAlert(activity, Constants.GPS);
+        } else if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+
+            getUserContacts(activity);
+            getUserDetails(activity);
 
         } else {
             if (Build.VERSION.SDK_INT > 28) {
-                ActivityCompat.requestPermissions(this, new String[]{
+                ActivityCompat.requestPermissions(activity, new String[]{
                                 Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                                 Manifest.permission.ACCESS_FINE_LOCATION,
                                 Manifest.permission.READ_SMS,
@@ -99,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                                 Manifest.permission.READ_PHONE_STATE},
                         REQUEST_LOCATION);
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ActivityCompat.requestPermissions(this, new String[]{
+                ActivityCompat.requestPermissions(activity, new String[]{
                                 Manifest.permission.ACCESS_FINE_LOCATION,
                                 Manifest.permission.READ_SMS,
                                 Manifest.permission.READ_PHONE_NUMBERS,
@@ -123,9 +140,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void initViews(Context context) {
+        progressBarRequest = findViewById(R.id.progress_bar_request);
         tv_location = findViewById(R.id.et_location);
         etPhoneNumber1 = findViewById(R.id.et_primarynumber);
         etPhoneNumber2 = findViewById(R.id.et_secondarynumber);
+        vehicleSpinner = findViewById(R.id.spinner_vehicle);
+        washingSpinner = findViewById(R.id.spinner_washing);
+        etMessage = findViewById(R.id.et_message);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -149,8 +170,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             dialogTitle = "Services Not Available for this Location";
             dialogMessage = "Currently this app is working in Hyderabad itself";
             positiveTitle = "Close App";
+        }else if (type == Constants.REQUESTRECIEVED){
+            dialogTitle = "THANKYOU!";
+            dialogMessage = "Our team will contact you soon";
+            positiveTitle = "OK";
         }
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        AlertDialog alert = alertDialogBuilder.create();
         alertDialogBuilder.setTitle(dialogTitle);
         alertDialogBuilder.setMessage(dialogMessage)
                 .setCancelable(false)
@@ -165,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                                     callIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                                     startActivityForResult(callIntent, Constants.PERMISSIONSREQUEST);
                                 } else if (type == 3) {
-                                    finish();
+                                    finishAffinity();
                                 }
 
                             }
@@ -180,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                         dialog.cancel();
                     }
                 });
-        AlertDialog alert = alertDialogBuilder.create();
+
         alert.show();
     }
 
@@ -244,34 +270,96 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             e.printStackTrace();
         }
 
-//        if (!add.isEmpty() && !add.contains("Hyderabad")) {
-//            showDialogAlert(MainActivity.this, 3);
-//        }
+        if (!add.isEmpty() && !add.contains("Hyderabad")) {
+            showDialogAlert(MainActivity.this, Constants.LOCATION_CONSTRAINT);
+        }
+
         return add;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_service_request:
-                Toast.makeText(MainActivity.this, "Thank you, Your Request id is 12324 \n Our team will serve you better in short time", Toast.LENGTH_SHORT).show();
-                finish();
-                break;
+                if (!TextUtils.isEmpty(tv_location.getText().toString())
+                && !TextUtils.isEmpty(etPhoneNumber1.getText().toString())) {
+                    String vehicleType = "Car 4 Wheeler";
+                    String washingType = "Sanitize";
+                    String userLocation = tv_location.getText().toString();
+                    String primaryNumber = etPhoneNumber1.getText().toString();
+                    String secondaryNumber = "";
+                    String userMessage = "";
+                    String requestingdate = getCurrentDate();
+                    String orderStatus = "Pending";
+                    boolean isValidUser = true;
 
-            case R.id.iv_selectlocation:
-                startActivityForResult(new Intent(MainActivity.this, MapsActivity.class), Constants.LATLNGREQUEST);
+                    if (vehicleSpinner.getSelectedItemPosition() > 0) vehicleType = vehicleSpinner.getSelectedItem().toString();
+                    if (washingSpinner.getSelectedItemPosition() > 0) vehicleType = vehicleSpinner.getSelectedItem().toString();
+                    if (!TextUtils.isEmpty(etMessage.getText().toString())) userMessage = etMessage.getText().toString();
+                    if (!TextUtils.isEmpty(etPhoneNumber2.getText().toString())) secondaryNumber = etPhoneNumber2.getText().toString();
+                    progressBarRequest.setVisibility(View.VISIBLE);
+                   customerObj = new Customer(vehicleType,washingType,primaryNumber,secondaryNumber,userLocation,userMessage,requestingdate,isValidUser,orderStatus);
+
+                   requestWebSerice(customerObj);
+                }else{
+                    requestUserPermissions(MainActivity.this);
+                }
                 break;
         }
+    }
+
+    private void requestWebSerice(Customer customerObj) {
+      Log.v(TAG,"---> customer obj "+customerObj.toString());
+
+        EndPoints webService = RetrofitInstance.getRetrofit().create(EndPoints.class);
+
+        //Request Object
+        Log.v(TAG,"customer request obj"+ customerObj.toString());
+        Call<BaseResponse> call = webService.requestWash(customerObj);
+        call.enqueue(new Callback<BaseResponse>() {
+            @Override
+            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
+                BaseResponse responseObj = response.body();
+                Log.v(TAG,"create customer response"+ response);
+                if (responseObj != null && !responseObj.equals("") && !responseObj.getStatus().isEmpty()){
+                    if (responseObj.getStatus().equals(Constants.SUCCESS)){
+                        Toast.makeText(MainActivity.this, ""+responseObj.getMessage(), Toast.LENGTH_SHORT).show();
+                        finishAffinity();
+                    }
+                }else{
+                    Toast.makeText(MainActivity.this, "Something went wrong, Please Try Again", Toast.LENGTH_SHORT).show();
+                }
+                progressBarRequest.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFailure(Call<BaseResponse> call, Throwable t) {
+                progressBarRequest.setVisibility(View.GONE);
+                Log.e(TAG,"customer request failed due to: "+ t.getMessage());
+                Toast.makeText(MainActivity.this, "Unable to make request due to "+t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /***
+     *
+     * @return
+     */
+    private String getCurrentDate() {
+        String date = "";
+        try {
+            date = new SimpleDateFormat(Constants.DATE_FORMAT_REQUEST).format(Calendar.getInstance().getTime());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return date;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Constants.LATLNGREQUEST) {
-            double latValue = data.getDoubleExtra("lat", 0.0);
-            double lngValue = data.getDoubleExtra("lng", 0.0);
-            tv_location.setText(getAddress(latValue, lngValue));
-        } else if (requestCode == Constants.PERMISSIONSREQUEST) {
+        if (requestCode == Constants.PERMISSIONSREQUEST) {
             initViews(getApplicationContext());
         } else if (requestCode == Constants.MOBILENO_REQUEST) {
             if (resultCode == RESULT_OK) {

@@ -6,7 +6,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/background_gradient"
     tools:context=".views.UsersActivity">
+
+    <LinearLayout
+        android:id="@+id/top_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:minHeight="?android:listPreferredItemHeight"
+        android:orientation="horizontal">
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:id="@+id/spinner_usertype"
+            android:layout_gravity="center"
+            android:entries="@array/array_listtype"
+            />
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,15 +34,17 @@
         android:minHeight="?android:listPreferredItemHeight"
         android:orientation="horizontal"
         android:id="@+id/dates_ll"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/top_ll"
+        android:layout_margin="4dp"
         android:weightSum="2">
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="From Date"
+            android:hint="From Date YYYY-MM-DD"
             android:id="@+id/from_txtip"
+            android:background="@drawable/blue_button_background"
             android:layout_weight="1">
-            <com.google.android.material.textfield.TextInputEditText
+            <EditText
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/txtip_Et_fromDt"
@@ -36,9 +58,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@drawable/blue_button_background"
             android:id="@+id/to_txtip"
-            android:hint="To Date">
-            <com.google.android.material.textfield.TextInputEditText
+            android:hint="To Date YYYY-MM-DD">
+            <EditText
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/txtip_Et_toDt"
@@ -69,5 +92,13 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/dates_ll"
         android:layout_margin="2dp"
-        android:id="@+id/recyclerView"/>
+        android:id="@+id/recyclerViewUsers"/>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:elevation="6dp"
+        android:id="@+id/progress_bar"
+        android:padding="10dp"/>
 </RelativeLayout>

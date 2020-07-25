@@ -1,5 +1,7 @@
 package com.service.car.models;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -8,7 +10,6 @@ public class Customer {
     /***
      * For Registering Using Customer POJO
      */
-
 
     @SerializedName("vehicleType")
     @Expose
@@ -41,14 +42,14 @@ public class Customer {
 
     @SerializedName("isValidUser")
     @Expose
-    private String isValidUser;
+    private boolean isValidUser;
 
     @SerializedName("orderStatus")
     @Expose
     private String orderStatus;
 
 
-    public Customer(String vehicleType, String washingType, String primaryNumber, String secondaryNumber, String userLocation, String userMessage, String date, String isValidUser, String orderStatus) {
+    public Customer(String vehicleType, String washingType, String primaryNumber, String secondaryNumber, String userLocation, String userMessage, String date, boolean isValidUser, String orderStatus) {
         this.vehicleType = vehicleType;
         this.washingType = washingType;
         this.primaryNumber = primaryNumber;
@@ -58,5 +59,14 @@ public class Customer {
         this.date = date;
         this.isValidUser = isValidUser;
         this.orderStatus = orderStatus;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "Customer vehicleType=" + vehicleType + ", washingType=" + washingType
+                + ", primaryNumber=" + primaryNumber + ", secondaryNumber=" + secondaryNumber + ", userLocation="
+                + userLocation + ", userMessage=" + userMessage + ", orderStatus=" + orderStatus + ", date=" + date
+                + ", isValidUser=" + isValidUser;
     }
 }

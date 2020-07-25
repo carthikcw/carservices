@@ -11,9 +11,9 @@ public class BaseResponse {
     @Expose
     private String status;
 
-    @SerializedName("userMessage")
+    @SerializedName("message")
     @Expose
-    private String userMessage;
+    private String message;
 
     @SerializedName("requests")
     @Expose
@@ -27,12 +27,12 @@ public class BaseResponse {
         this.status = status;
     }
 
-    public String getUserMessage() {
-        return userMessage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setUserMessage(String userMessage) {
-        this.userMessage = userMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public List<User> getRequests() {

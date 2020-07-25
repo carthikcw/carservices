@@ -9,14 +9,20 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
-public interface WebServices {
+public interface EndPoints {
 
+    @Headers({
+            "Content-Type: application/json"
+    })
     @POST("requestWash")
-    Call<Customer> requestWash(@Body Customer customer);
+    Call<BaseResponse> requestWash(@Body Customer customer);
 
-
+    @Headers({
+            "Content-Type: application/json"
+    })
     @POST("getRequests")
     Call<BaseResponse> getRequests(@Body UserRequest userRequest);
 }

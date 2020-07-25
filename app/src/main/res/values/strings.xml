@@ -4,6 +4,14 @@
     <string name="gps_network_not_enabled">"Location Disabled "</string>
     <string name="open_location_settings">Open Location Settings</string>
 
+    <string-array name="array_listtype">
+
+        <item>Customers</item>
+
+        <item>Providers</item>
+
+    </string-array>
+
     <string-array name="array_vehichle">
 
         <item>Select Vehichle Type</item>
@@ -39,5 +47,6 @@
 
     </string-array>
     <string name="title_activity_maps">Map</string>
+    <string name="no_requests">NO REQUESTS</string>
 
 </resources>

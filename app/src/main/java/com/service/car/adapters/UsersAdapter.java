@@ -1,6 +1,7 @@
 package com.service.car.adapters;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.service.car.R;
 import com.service.car.models.User;
+import com.service.car.utils.ClickListener;
 
 import java.util.List;
 
@@ -18,11 +20,14 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
     private List<User> users;
     private Context context;
     private TextView textViewNoUsers;
+    private String[] datetime;
+    private ClickListener clickListener;
 
-    public UsersAdapter(List<User> users, Context mcontext, TextView tv_noUsers) {
+    public UsersAdapter(List<User> users, Context mcontext, TextView tv_noUsers,ClickListener clickListener) {
         this.users = users;
         this.context = mcontext;
         this.textViewNoUsers = tv_noUsers;
+        this.clickListener = clickListener;
     }
 
     @NonNull
@@ -31,18 +36,26 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View listItem= layoutInflater.inflate(R.layout.layout_user_childview, parent, false);
         ViewHolder viewHolder = new ViewHolder(listItem);
+
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.primaryNumber.setText(users.get(position).getPrimaryNumber());
-        holder.secondaryNumber.setText(users.get(position).getSecondaryNumber());
-        holder.vehicleType.setText(users.get(position).getVehicleType());
-        holder.washingType.setText(users.get(position).getWashingType());
-        holder.requestDate.setText(users.get(position).getDate());
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+        holder.primaryNumber.setText("Contact " + users.get(position).getPrimaryNumber());
+        holder.secondaryNumber.setText("Alternate Number"+users.get(position).getSecondaryNumber());
+        holder.vehicleType.setText("Vehicle Type "+ users.get(position).getVehicleType());
+        holder.washingType.setText("Washing Type  "+users.get(position).getWashingType());
+        holder.requestDate.setText("Date - Time "+(users.get(position).getDate()).replace("T"," - "));
         holder.userLocation.setText(users.get(position).getUserLocation());
         holder.userMessage.setText(users.get(position).getUserMessage());
+
+        holder.primaryNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickListener.onItemClick(context,position,users.get(position).getPrimaryNumber());
+            }
+        });
     }
     @Override
     public int getItemCount() {
@@ -73,6 +86,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
             this.userLocation = (TextView) listItem.findViewById(R.id.tv_userLocation);
             this.userMessage = (TextView) listItem.findViewById(R.id.tv_userMessage);
             this.requestDate = (TextView) listItem.findViewById(R.id.tv_requestDate);
+
+            this.primaryNumber.setPaintFlags(this.primaryNumber.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         }
     }
 }

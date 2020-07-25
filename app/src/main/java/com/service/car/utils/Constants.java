@@ -17,8 +17,16 @@ public class Constants {
 
     public static final int INTERNET = 1;
     public static final int GPS = 2;
+    public static final int LOCATION_CONSTRAINT = 3;
+    public static final int REQUESTRECIEVED = 4;
+
     public static final int LATLNGREQUEST = 999;
     public static final int PERMISSIONSREQUEST = 1000;
 
     public static final int MOBILENO_REQUEST = 101;
+
+    public static final String DATE_FORMAT_REQUEST = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String ONLY_DATE_FORMAT = "yyyy-MM-dd";
+    public static String SUCCESS = "success";
+
 }

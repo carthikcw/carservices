@@ -16,6 +16,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_primaryNumber"
+                android:textStyle="bold"
                 android:padding="2dp"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -26,6 +27,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_requestDate"
+                android:textStyle="bold"
                 android:padding="2dp"/>
 
             <TextView
@@ -42,6 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_userLocation"
+                android:textStyle="bold"
                 android:padding="2dp"/>
             <TextView
                 android:layout_width="wrap_content"
