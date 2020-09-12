@@ -48,8 +48,14 @@ public class Customer {
     @Expose
     private String orderStatus;
 
+    @SerializedName("uuid")
+    @Expose
+    private String uuid;
 
-    public Customer(String vehicleType, String washingType, String primaryNumber, String secondaryNumber, String userLocation, String userMessage, String date, boolean isValidUser, String orderStatus) {
+
+    public Customer(String vehicleType, String washingType, String primaryNumber, String secondaryNumber,
+                    String userLocation, String userMessage, String date, boolean isValidUser,
+                    String orderStatus, String uuid) {
         this.vehicleType = vehicleType;
         this.washingType = washingType;
         this.primaryNumber = primaryNumber;
@@ -59,6 +65,7 @@ public class Customer {
         this.date = date;
         this.isValidUser = isValidUser;
         this.orderStatus = orderStatus;
+        this.uuid = uuid;
     }
 
     @NonNull
@@ -67,6 +74,6 @@ public class Customer {
         return "Customer vehicleType=" + vehicleType + ", washingType=" + washingType
                 + ", primaryNumber=" + primaryNumber + ", secondaryNumber=" + secondaryNumber + ", userLocation="
                 + userLocation + ", userMessage=" + userMessage + ", orderStatus=" + orderStatus + ", date=" + date
-                + ", isValidUser=" + isValidUser;
+                + ", isValidUser=" + isValidUser + ", uuid= "+uuid;
     }
 }

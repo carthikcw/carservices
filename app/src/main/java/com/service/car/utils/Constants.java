@@ -1,5 +1,7 @@
 package com.service.car.utils;
 
+import java.util.UUID;
+
 public class Constants {
     // App Constants
     public static final String userId = "USER_ID";
@@ -27,6 +29,17 @@ public class Constants {
 
     public static final String DATE_FORMAT_REQUEST = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String ONLY_DATE_FORMAT = "yyyy-MM-dd";
+    public static final int PHONECALL1 = 2001;
+    public static final int PHONECALL2 = 2002;
+    public static final int MAPSCALL = 2003;
+    public static final String OTP = "OTP_KEY";
+    public static final String OTP_SESSION_ID = "OTP_SESSION_ID";
     public static String SUCCESS = "success";
 
+    public static String DEVICE_ID = "DEVICEID";
+    public static final int REQUEST_VALIDSCREEN = -771;
+
+
+    // OTP API KEY
+    public static final String OTP_API_KEY = "6b55d8b6-f515-11ea-9fa5-0200cd936042";
 }

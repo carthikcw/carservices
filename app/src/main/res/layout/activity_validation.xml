@@ -1,105 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".views.ValidationActivity"
-    android:orientation="vertical">
-
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:padding="5dp"
-        app:srcCompat="@drawable/alltimeservice"/>
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:padding="5dp"
-        app:srcCompat="@drawable/sanitisationboy"/>
-
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:padding="5dp"
-        app:srcCompat="@drawable/carwasher"/>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtipuserlogin"
-        android:visibility="gone"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:minHeight="?android:listPreferredItemHeight">
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:minHeight="?android:listPreferredItemHeight"
-        android:minLines="1"
-        android:maxLength="10"
-        android:inputType="number"
-        android:hint="Mobile Number"
-        android:id="@+id/et_login"
-        />
-    </com.google.android.material.textfield.TextInputLayout>
-
+    tools:context=".views.ValidationActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center"
-        android:layout_margin="40dp"
-        android:id="@+id/ll_termsnconditions"
-        android:gravity="center">
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:id="@+id/cb_terms"
-            android:clickable="false"
-            android:gravity="center"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:clickable="false"
-            android:layout_gravity="center"
-            android:gravity="start|center"
-            android:text="I accept the "
-            />
+        android:orientation="vertical">
 
-        <TextView
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_margin="5dp"
+            app:srcCompat="@drawable/alltimeservice" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_margin="5dp"
+            app:srcCompat="@drawable/sanitisationboy" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_margin="5dp"
+            app:srcCompat="@drawable/carwasher" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/txtipuserlogin"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:hint="Mobile Number">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="10"
+                android:minHeight="?android:listPreferredItemHeightSmall"
+                android:maxLines="1"
+                android:padding="2dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/txtipuserOtp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="200dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:hint="Otp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_Otp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="6"
+                android:minHeight="?android:listPreferredItemHeightSmall"
+                android:maxLines="1"
+                android:padding="2dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_termsnconditions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:id="@+id/tv_terms"
             android:layout_gravity="center"
-            android:textColor="@color/colorAccent"
-            android:gravity="start|center"
-            android:text="Terms &amp; Conditions"
-            />
+            android:layout_margin="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/cb_terms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="false"
+                android:text=" I agree to "
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/tv_terms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="start|center"
+                android:text="Terms &amp; Conditions"
+                android:textColor="@color/colorAccent"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_go"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            app:cardBackgroundColor="@color/colorPrimaryDark"
+            app:cardCornerRadius="8dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
+        </androidx.cardview.widget.CardView>
+
     </LinearLayout>
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp"
-        android:id="@+id/card_go"
-        app:cardBackgroundColor="@color/colorPrimaryDark"
-        android:layout_gravity="center">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp"/>
-    </androidx.cardview.widget.CardView>
 
-</LinearLayout>
+</ScrollView>

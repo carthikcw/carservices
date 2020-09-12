@@ -14,6 +14,9 @@ public class UserRequest {
     @Expose
     private String toDate;
 
+    @SerializedName("uuid")
+    @Expose
+    private String uuid;
 
     public String getFromDate() {
         return fromDate;
@@ -29,5 +32,13 @@ public class UserRequest {
 
     public void setToDate(String toDate) {
         this.toDate = toDate;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

@@ -10,31 +10,12 @@
     tools:context=".views.UsersActivity">
 
     <LinearLayout
-        android:id="@+id/top_ll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:gravity="center"
-        android:minHeight="?android:listPreferredItemHeight"
-        android:orientation="horizontal">
-        <androidx.appcompat.widget.AppCompatSpinner
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:id="@+id/spinner_usertype"
-            android:layout_gravity="center"
-            android:entries="@array/array_listtype"
-            />
-    </LinearLayout>
-
-
-    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?android:listPreferredItemHeight"
         android:orientation="horizontal"
         android:id="@+id/dates_ll"
-        android:layout_below="@+id/top_ll"
+        android:layout_alignParentTop="true"
         android:layout_margin="4dp"
         android:weightSum="2">
         <com.google.android.material.textfield.TextInputLayout
